@@ -1,0 +1,1882 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="utf-8">
+
+    <title>
+        Access to Parks in Singapore
+    </title>
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
+
+    <link
+        href="https://api.mapbox.com/mapbox-gl-js/v3.27.0/mapbox-gl.css"
+        rel="stylesheet"
+    >
+
+    <script
+        src="https://api.mapbox.com/mapbox-gl-js/v3.27.0/mapbox-gl.js">
+    </script>
+
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+
+        body {
+
+            margin: 0;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            background:
+                #f7f7f7;
+
+            color:
+                #222;
+
+        }
+
+
+        /* =========================
+           MAP
+        ========================= */
+
+        #map {
+
+            position: fixed;
+
+            top: 0;
+            right: 0;
+
+            width: 65%;
+            height: 100vh;
+
+        }
+
+
+        /* =========================
+           STORY
+        ========================= */
+
+        #story {
+
+            width: 35%;
+
+            position: relative;
+
+            z-index: 2;
+
+        }
+
+
+        /* =========================
+           INTRO
+        ========================= */
+
+        .intro {
+
+            min-height: 100vh;
+
+            display: flex;
+
+            align-items: center;
+
+            padding:
+                50px 35px;
+
+            color:
+                white;
+
+            position:
+                relative;
+
+            background-image:
+
+                linear-gradient(
+                    rgba(0,0,0,0.58),
+                    rgba(0,0,0,0.58)
+                ),
+
+                url("images/intro-park.jpg");
+
+            background-size:
+                cover;
+
+            background-position:
+                center;
+
+        }
+
+
+        .intro-content {
+
+            position:
+                relative;
+
+            z-index:
+                2;
+
+        }
+
+
+        .intro h1 {
+
+            font-size:
+                40px;
+
+            line-height:
+                1.12;
+
+            margin-top:
+                0;
+
+            margin-bottom:
+                30px;
+
+        }
+
+
+        .intro p {
+
+            font-size:
+                17px;
+
+            line-height:
+                1.65;
+
+            max-width:
+                430px;
+
+        }
+
+
+        .scroll-hint {
+
+            margin-top:
+                35px;
+
+            font-weight:
+                bold;
+
+            font-size:
+                14px;
+
+            opacity:
+                0.9;
+
+        }
+
+
+        /* =========================
+           CHAPTERS
+        ========================= */
+
+        .chapter {
+
+            min-height:
+                100vh;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            padding:
+                50px 35px;
+
+        }
+
+
+        .chapter-content {
+
+            background:
+                rgba(255,255,255,0.95);
+
+            padding:
+                24px;
+
+            border-radius:
+                8px;
+
+            box-shadow:
+                0 2px 12px
+                rgba(0,0,0,0.12);
+
+        }
+
+
+        h2 {
+
+            font-size:
+                23px;
+
+            margin-top:
+                0;
+
+        }
+
+
+        p {
+
+            line-height:
+                1.6;
+
+            font-size:
+                15px;
+
+        }
+
+
+        /* =========================
+           IMAGES
+        ========================= */
+
+        .chapter-image {
+
+            width:
+                100%;
+
+            margin-top:
+                18px;
+
+            border-radius:
+                6px;
+
+            display:
+                block;
+
+        }
+
+
+        .image-caption {
+
+            margin-top:
+                7px;
+
+            font-size:
+                11px;
+
+            line-height:
+                1.4;
+
+            color:
+                #666;
+
+        }
+
+
+        /* =========================
+           LEGEND
+        ========================= */
+
+        #legend {
+
+            position:
+                fixed;
+
+            right:
+                20px;
+
+            bottom:
+                30px;
+
+            z-index:
+                5;
+
+            background:
+                rgba(255,255,255,0.96);
+
+            padding:
+                12px 14px;
+
+            border-radius:
+                6px;
+
+            box-shadow:
+                0 2px 10px
+                rgba(0,0,0,0.15);
+
+            font-size:
+                13px;
+
+            display:
+                none;
+
+            min-width:
+                185px;
+
+        }
+
+
+        .legend-title {
+
+            font-weight:
+                bold;
+
+            margin-bottom:
+                8px;
+
+        }
+
+
+        .legend-row {
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            margin:
+                5px 0;
+
+        }
+
+
+        .legend-color {
+
+            width:
+                16px;
+
+            height:
+                16px;
+
+            margin-right:
+                8px;
+
+            border:
+                1px solid
+                rgba(0,0,0,0.15);
+
+        }
+
+
+        /* =========================
+           POPUP
+        ========================= */
+
+        .mapboxgl-popup-content {
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+            font-size:
+                13px;
+
+            line-height:
+                1.5;
+
+        }
+
+
+        .popup-title {
+
+            font-weight:
+                bold;
+
+            font-size:
+                14px;
+
+            margin-bottom:
+                5px;
+
+        }
+
+
+        /* =========================
+           END PAGE
+        ========================= */
+
+        .ending {
+
+            min-height:
+                100vh;
+
+            display:
+                flex;
+
+            align-items:
+                center;
+
+            padding:
+                50px 35px;
+
+            background:
+                #1f2822;
+
+            color:
+                white;
+
+        }
+
+
+        .ending-content {
+
+            max-width:
+                430px;
+
+        }
+
+
+        .ending h2 {
+
+            font-size:
+                31px;
+
+            line-height:
+                1.2;
+
+            margin-bottom:
+                25px;
+
+        }
+
+
+        .ending p {
+
+            font-size:
+                15px;
+
+            line-height:
+                1.65;
+
+            color:
+                #eeeeee;
+
+        }
+
+
+        .method-note {
+
+            margin-top:
+                28px;
+
+            padding-top:
+                18px;
+
+            border-top:
+                1px solid
+                rgba(255,255,255,0.25);
+
+            font-size:
+                12px !important;
+
+            color:
+                #bbbbbb !important;
+
+        }
+
+
+        .back-button {
+
+            display:
+                inline-block;
+
+            margin-top:
+                25px;
+
+            padding:
+                10px 16px;
+
+            border:
+                1px solid white;
+
+            border-radius:
+                5px;
+
+            color:
+                white;
+
+            text-decoration:
+                none;
+
+            font-size:
+                13px;
+
+            transition:
+                0.2s;
+
+        }
+
+
+        .back-button:hover {
+
+            background:
+                white;
+
+            color:
+                #222;
+
+        }
+
+
+        /* =========================
+           MOBILE
+        ========================= */
+
+        @media
+        (max-width: 800px) {
+
+            #story {
+
+                width:
+                    45%;
+
+            }
+
+
+            #map {
+
+                width:
+                    55%;
+
+            }
+
+
+            .intro h1 {
+
+                font-size:
+                    30px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+
+<body>
+
+
+<div id="map"></div>
+
+<div id="legend"></div>
+
+
+<div id="story">
+
+
+    <!-- =========================
+         INTRO
+    ========================== -->
+
+    <section
+        class="intro"
+        id="top"
+    >
+
+        <div class="intro-content">
+
+            <h1>
+
+                Who Has Better
+                Access to Parks
+                in Singapore?
+
+            </h1>
+
+
+            <p>
+
+                Exploring the relationship
+                between population distribution,
+                park accessibility and
+                neighbourhood-level spatial
+                inequality across Singapore.
+
+            </p>
+
+
+            <div class="scroll-hint">
+
+                Scroll down to explore ↓
+
+            </div>
+
+
+            <div
+                class="image-caption"
+                style="
+                    color:#ddd;
+                    margin-top:20px;
+                "
+            >
+
+                Background:
+                Singapore Botanic Gardens.
+
+            </div>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         CHAPTER 1
+    ========================== -->
+
+    <section
+        class="chapter"
+        data-chapter="parks"
+    >
+
+        <div class="chapter-content">
+
+            <h2>
+                1. Parks in Singapore
+            </h2>
+
+
+            <p>
+
+                Singapore contains an extensive
+                network of parks distributed
+                across the island.
+
+            </p>
+
+
+            <p>
+
+                However, the spatial distribution
+                of these parks is not uniform.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         CHAPTER 2
+    ========================== -->
+
+    <section
+        class="chapter"
+        data-chapter="population"
+    >
+
+        <div class="chapter-content">
+
+            <h2>
+                2. Where Do People Live?
+            </h2>
+
+
+            <p>
+
+                Population is concentrated in
+                several major residential areas.
+
+            </p>
+
+
+            <p>
+
+                Darker hexagons indicate
+                higher population within each
+                analytical grid.
+
+            </p>
+
+
+            <p>
+
+                Click a hexagon to inspect
+                its population.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         CHAPTER 3
+    ========================== -->
+
+    <section
+        class="chapter"
+        data-chapter="accessibility"
+    >
+
+        <div class="chapter-content">
+
+            <h2>
+
+                3. Who Has Better
+                Access to Parks?
+
+            </h2>
+
+
+            <p>
+
+                Park accessibility is measured
+                using the population-weighted
+                average distance to the
+                nearest park.
+
+            </p>
+
+
+            <p>
+
+                Green indicates shorter
+                distances and better access,
+                while orange and red indicate
+                progressively poorer access.
+
+            </p>
+
+
+            <p>
+
+                Click a residential hexagon
+                to inspect its accessibility.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         CHAPTER 4
+    ========================== -->
+
+    <section
+        class="chapter"
+        data-chapter="hotspot"
+    >
+
+        <div class="chapter-content">
+
+            <h2>
+                4. Where Are the Mismatches?
+            </h2>
+
+
+            <p>
+
+                Hotspots identify areas where
+                relatively high population
+                coincides with comparatively
+                poor access to parks.
+
+            </p>
+
+
+            <p>
+
+                Core hotspots are shown in red,
+                while surrounding concern areas
+                are shown in orange.
+
+            </p>
+
+
+            <p>
+
+                One identified hotspot lies
+                around the Senoko industrial
+                area in northern Singapore.
+
+            </p>
+
+
+            <img
+
+                src="images/family-park.jpg"
+
+                class="chapter-image"
+
+                alt="
+                    Visitors enjoying a park
+                    in Singapore
+                "
+
+            >
+
+
+            <div class="image-caption">
+
+                Public parks can support
+                recreation, social interaction
+                and family activities.
+
+            </div>
+
+
+            <p>
+
+                Click a hotspot to inspect
+                its average park distance.
+
+            </p>
+
+        </div>
+
+    </section>
+
+
+
+    <!-- =========================
+         END PAGE
+    ========================== -->
+
+    <section
+        class="ending chapter"
+        data-chapter="ending"
+    >
+
+        <div class="ending-content">
+
+
+            <h2>
+
+                A Greener City
+                Is Also About Access
+
+            </h2>
+
+
+            <p>
+
+                Singapore has extensive park
+                coverage, but proximity to green
+                space still varies at the
+                neighbourhood scale.
+
+            </p>
+
+
+            <p>
+
+                Combining population distribution
+                with population-weighted distance
+                reveals local mismatches that are
+                less visible from a citywide view
+                of green space alone.
+
+            </p>
+
+
+            <p>
+
+                Improving urban greening is
+                therefore not only about providing
+                more green space, but also about
+                ensuring that it is accessible to
+                the communities that use it.
+
+            </p>
+
+
+            <p class="method-note">
+
+                Method note:
+                Accessibility is represented by
+                population-weighted straight-line
+                distance to the nearest mapped
+                park. The analysis does not
+                account for park entrances,
+                pedestrian networks, park size,
+                facilities or perceived quality.
+
+            </p>
+
+
+            <a
+                class="back-button"
+                href="#top"
+            >
+
+                ↑ Back to beginning
+
+            </a>
+
+
+        </div>
+
+    </section>
+
+
+</div>
+
+
+
+<script>
+
+
+/* =========================
+   MAPBOX
+========================= */
+
+mapboxgl.accessToken =
+'pk.eyJ1Ijoia2FyZmdnaGYiLCJhIjoiY21maHluMXRtMGhnbzJub3JtdWp1N3NybiJ9.XrdmjNjNgkkvnuvQkAtrfA';
+
+
+
+const map =
+new mapboxgl.Map({
+
+    container:
+        'map',
+
+    style:
+        'mapbox://styles/karfgghf/cmtnvg2rm00d201pm8lkp252u',
+
+    center:
+        [
+            103.8362759273295,
+            1.2911943041566332
+        ],
+
+    zoom:
+        10.336855115497288,
+
+    bearing:
+        0,
+
+    pitch:
+        0
+
+});
+
+
+
+map.addControl(
+
+    new mapboxgl.NavigationControl(),
+
+    'top-right'
+
+);
+
+
+
+/* =========================
+   LAYERS
+========================= */
+
+const layers = [
+
+    'park',
+
+    'population-hex',
+
+    'accessibility-hex',
+
+    'hotspot'
+
+];
+
+
+
+/* =========================
+   CHAPTER SETTINGS
+========================= */
+
+const chapters = {
+
+
+    parks: {
+
+        visible:
+            ['park'],
+
+        center:
+            [103.8363, 1.3521],
+
+        zoom:
+            10.2
+
+    },
+
+
+    population: {
+
+        visible:
+            ['population-hex'],
+
+        center:
+            [103.8363, 1.3521],
+
+        zoom:
+            10.2
+
+    },
+
+
+    accessibility: {
+
+        visible:
+            ['accessibility-hex'],
+
+        center:
+            [103.8363, 1.3521],
+
+        zoom:
+            10.2
+
+    },
+
+
+    hotspot: {
+
+        visible:
+            ['park', 'hotspot'],
+
+        center:
+            [103.8018, 1.4638],
+
+        zoom:
+            13.2
+
+    },
+
+
+    ending: {
+
+        visible:
+            ['park', 'hotspot'],
+
+        center:
+            [103.8363, 1.3521],
+
+        zoom:
+            10.2
+
+    }
+
+};
+
+
+
+/* =========================
+   LEGENDS
+========================= */
+
+const legend =
+document.getElementById(
+    'legend'
+);
+
+
+
+const legends = {
+
+
+    parks:
+        '',
+
+
+
+    population: `
+
+        <div class="legend-title">
+            Population
+        </div>
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#f8ddaf
+                "
+            ></div>
+
+            Low
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#f2af78
+                "
+            ></div>
+
+            Medium
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#d95a16
+                "
+            ></div>
+
+            High
+
+        </div>
+
+    `,
+
+
+
+    accessibility: `
+
+        <div class="legend-title">
+            Park Accessibility
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#1ba300
+                "
+            ></div>
+
+            ≤ 300 m
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#8af24a
+                "
+            ></div>
+
+            300–500 m
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#eadf6c
+                "
+            ></div>
+
+            500–800 m
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#ddab69
+                "
+            ></div>
+
+            800–1000 m
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#da4949
+                "
+            ></div>
+
+            > 1000 m
+
+        </div>
+
+    `,
+
+
+
+    hotspot: `
+
+        <div class="legend-title">
+
+            High Population ×
+            Poor Park Access
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#c10b0b
+                "
+            ></div>
+
+            Core hotspot
+
+        </div>
+
+
+        <div class="legend-row">
+
+            <div
+                class="legend-color"
+                style="
+                    background:#ff9705
+                "
+            ></div>
+
+            Surrounding concern area
+
+        </div>
+
+    `,
+
+
+    ending:
+        ''
+
+};
+
+
+
+function showLegend(name) {
+
+
+    if (legends[name]) {
+
+        legend.innerHTML =
+            legends[name];
+
+        legend.style.display =
+            'block';
+
+    }
+
+    else {
+
+        legend.style.display =
+            'none';
+
+    }
+
+}
+
+
+
+/* =========================
+   CHAPTER SWITCH
+========================= */
+
+function showChapter(name) {
+
+
+    const chapter =
+        chapters[name];
+
+
+    if (!chapter)
+        return;
+
+
+
+    layers.forEach(
+
+        layerId => {
+
+
+            if (
+                !map.getLayer(layerId)
+            )
+                return;
+
+
+            const visibility =
+
+                chapter.visible.includes(
+                    layerId
+                )
+
+                ? 'visible'
+
+                : 'none';
+
+
+            map.setLayoutProperty(
+
+                layerId,
+
+                'visibility',
+
+                visibility
+
+            );
+
+        }
+
+    );
+
+
+    showLegend(name);
+
+
+
+    map.flyTo({
+
+        center:
+            chapter.center,
+
+        zoom:
+            chapter.zoom,
+
+        bearing:
+            0,
+
+        pitch:
+            0,
+
+        duration:
+            1400
+
+    });
+
+}
+
+
+
+/* =========================
+   ACCESSIBILITY LABEL
+========================= */
+
+function accessibilityLabel(level) {
+
+
+    const labels = {
+
+        5:
+            'Very High (≤300 m)',
+
+        4:
+            'High (300–500 m)',
+
+        3:
+            'Moderate (500–800 m)',
+
+        2:
+            'Low (800–1000 m)',
+
+        1:
+            'Very Low (>1000 m)',
+
+        0:
+            'No Population',
+
+        '-1':
+            'No Data'
+
+    };
+
+
+    return labels[level]
+        || 'Unknown';
+
+}
+
+
+
+/* =========================
+   MAP LOAD
+========================= */
+
+map.on('load', () => {
+
+
+    layers.forEach(
+
+        layerId => {
+
+
+            if (
+                map.getLayer(layerId)
+            ) {
+
+                map.setLayoutProperty(
+
+                    layerId,
+
+                    'visibility',
+
+                    'none'
+
+                );
+
+            }
+
+        }
+
+    );
+
+
+
+    showChapter(
+        'parks'
+    );
+
+
+
+    /* =========================
+       SCROLL
+    ========================= */
+
+    const observer =
+    new IntersectionObserver(
+
+
+        entries => {
+
+
+            entries.forEach(
+
+                entry => {
+
+
+                    if (
+
+                        entry.isIntersecting
+                        &&
+                        entry.intersectionRatio
+                        > 0.5
+
+                    ) {
+
+
+                        const chapterName =
+
+                            entry.target
+                            .dataset
+                            .chapter;
+
+
+                        showChapter(
+                            chapterName
+                        );
+
+                    }
+
+                }
+
+            );
+
+        },
+
+
+        {
+
+            threshold:
+                0.55
+
+        }
+
+    );
+
+
+
+    document
+    .querySelectorAll(
+        '.chapter'
+    )
+    .forEach(
+
+        section => {
+
+            observer.observe(
+                section
+            );
+
+        }
+
+    );
+
+
+
+    /* =========================
+       POPULATION POPUP
+    ========================= */
+
+    map.on(
+
+        'click',
+
+        'population-hex',
+
+        e => {
+
+
+            if (!e.features.length)
+                return;
+
+
+            const p =
+                e.features[0]
+                .properties;
+
+
+            const population =
+
+                Number(
+                    p.sumpop || 0
+                )
+
+                .toLocaleString(
+
+                    undefined,
+
+                    {
+                        maximumFractionDigits:
+                            0
+                    }
+
+                );
+
+
+            new mapboxgl.Popup()
+
+            .setLngLat(
+                e.lngLat
+            )
+
+            .setHTML(`
+
+                <div class="popup-title">
+
+                    Population Grid
+
+                </div>
+
+
+                <strong>
+                    Grid ID:
+                </strong>
+
+                ${p.GRID_ID || 'N/A'}
+
+                <br>
+
+
+                <strong>
+                    Population:
+                </strong>
+
+                ${population}
+
+            `)
+
+            .addTo(map);
+
+        }
+
+    );
+
+
+
+    /* =========================
+       ACCESSIBILITY POPUP
+    ========================= */
+
+    map.on(
+
+        'click',
+
+        'accessibility-hex',
+
+        e => {
+
+
+            if (!e.features.length)
+                return;
+
+
+            const p =
+                e.features[0]
+                .properties;
+
+
+            const population =
+
+                Number(
+                    p.sumpop || 0
+                )
+
+                .toLocaleString(
+
+                    undefined,
+
+                    {
+                        maximumFractionDigits:
+                            0
+                    }
+
+                );
+
+
+            const distance =
+
+                Number(
+                    p.AVG_PARK_D || 0
+                )
+
+                .toFixed(0);
+
+
+            new mapboxgl.Popup()
+
+            .setLngLat(
+                e.lngLat
+            )
+
+            .setHTML(`
+
+                <div class="popup-title">
+
+                    Park Accessibility
+
+                </div>
+
+
+                <strong>
+                    Grid ID:
+                </strong>
+
+                ${p.GRID_ID || 'N/A'}
+
+                <br>
+
+
+                <strong>
+                    Population:
+                </strong>
+
+                ${population}
+
+                <br>
+
+
+                <strong>
+                    Average distance:
+                </strong>
+
+                ${distance} m
+
+                <br>
+
+
+                <strong>
+                    Accessibility:
+                </strong>
+
+                ${accessibilityLabel(
+                    p.alllevel
+                )}
+
+            `)
+
+            .addTo(map);
+
+        }
+
+    );
+
+
+
+    /* =========================
+       HOTSPOT POPUP
+    ========================= */
+
+    map.on(
+
+        'click',
+
+        'hotspot',
+
+        e => {
+
+
+            if (!e.features.length)
+                return;
+
+
+            const p =
+                e.features[0]
+                .properties;
+
+
+            const distance =
+
+                Number(
+                    p.AVG_PARK_D || 0
+                )
+
+                .toFixed(0);
+
+
+            new mapboxgl.Popup()
+
+            .setLngLat(
+                e.lngLat
+            )
+
+            .setHTML(`
+
+                <div class="popup-title">
+
+                    Park Access Hotspot
+
+                </div>
+
+
+                <strong>
+                    Grid ID:
+                </strong>
+
+                ${p.GRID_ID || 'N/A'}
+
+                <br>
+
+
+                <strong>
+                    Type:
+                </strong>
+
+                ${p['热点'] || 'N/A'}
+
+                <br>
+
+
+                <strong>
+                    Average distance:
+                </strong>
+
+                ${distance} m
+
+            `)
+
+            .addTo(map);
+
+        }
+
+    );
+
+
+
+    /* =========================
+       CURSOR
+    ========================= */
+
+    [
+
+        'population-hex',
+
+        'accessibility-hex',
+
+        'hotspot'
+
+    ]
+
+    .forEach(
+
+        layerId => {
+
+
+            map.on(
+
+                'mouseenter',
+
+                layerId,
+
+                () => {
+
+                    map
+                    .getCanvas()
+                    .style
+                    .cursor =
+                        'pointer';
+
+                }
+
+            );
+
+
+            map.on(
+
+                'mouseleave',
+
+                layerId,
+
+                () => {
+
+                    map
+                    .getCanvas()
+                    .style
+                    .cursor =
+                        '';
+
+                }
+
+            );
+
+        }
+
+    );
+
+
+});
+
+
+</script>
+
+
+</body>
+
+</html>
